@@ -24,18 +24,30 @@ type httptestService struct{}
 
 // GetWithQuery implements Service.
 func (s httptestService) GetWithQuery(ctx context.Context, in *pb.GetWithQueryRequest) (*pb.GetWithQueryResponse, error) {
-	_ = ctx
-	_ = in
+
 	response := pb.GetWithQueryResponse{
 		V: in.A + in.B,
 	}
+
 	return &response, nil
 }
 
 // GetWithRepeatedQuery implements Service.
+func (s httptestService) GetWithRepeatedQuery(ctx context.Context, in *pb.GetWithRepeatedQueryRequest) (*pb.GetWithRepeatedQueryResponse, error) {
+	var out int64
 
-// V:
+	for _, v := range in.A {
+		out = out + v
+	}
+
+	response := pb.GetWithRepeatedQueryResponse{
+		V: out,
+	}
+
+	return &response, nil
+}
 
 type Service interface {
 	GetWithQuery(ctx context.Context, in *pb.GetWithQueryRequest) (*pb.GetWithQueryResponse, error)
+	GetWithRepeatedQuery(ctx context.Context, in *pb.GetWithRepeatedQueryRequest) (*pb.GetWithRepeatedQueryResponse, error)
 }

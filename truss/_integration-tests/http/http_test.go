@@ -37,9 +37,11 @@ func init() {
 
 	// Endpoint domain.
 	getWithQueryE := svc.MakeGetWithQueryEndpoint(service)
+	getWithRepeatedQueryE := svc.MakeGetWithRepeatedQueryEndpoint(service)
 
 	endpoints := svc.Endpoints{
-		GetWithQueryEndpoint: getWithQueryE,
+		GetWithQueryEndpoint:         getWithQueryE,
+		GetWithRepeatedQueryEndpoint: getWithRepeatedQueryE,
 	}
 
 	ctx := context.Background()
@@ -89,6 +91,61 @@ func TestGetWithQueryRequest(t *testing.T) {
 	defer httpResp.Body.Close()
 
 	var resp pb.GetWithQueryResponse
+
+	respBytes, err := ioutil.ReadAll(httpResp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = json.Unmarshal(respBytes, &resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.V != want {
+		t.Fatalf("Expect: %d, got %d", want, resp.V)
+	}
+}
+
+func TestGetWithRepeatedQueryClient(t *testing.T) {
+	var req pb.GetWithRepeatedQueryRequest
+	req.A = []int64{12, 45360}
+	want := req.A[0] + req.A[1]
+
+	svchttp, err := httpclient.New(httpserver.URL)
+	if err != nil {
+		t.Fatalf("failed to create httpclient: %q", err)
+	}
+
+	resp, err := svchttp.GetWithRepeatedQuery(context.Background(), &req)
+	if err != nil {
+		t.Fatalf("httpclient returned error: %q", err)
+	}
+
+	if resp.V != want {
+		t.Fatalf("Expect: %d, got %d", want, resp.V)
+	}
+}
+
+func TestGetWithRepeatedQueryRequest(t *testing.T) {
+	var A []int64
+	A = []int64{12, 45360}
+	want := A[0] + A[1]
+
+	route := fmt.Sprintf("%s/%s?%s=%d&%s=%d", httpserver.URL, "getwithrepeatedquery", "A", A[0], "A", A[1])
+	httpReq, err := http.NewRequest("GET", route, bytes.NewBuffer(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client := &http.Client{}
+	httpResp, err := client.Do(httpReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer httpResp.Body.Close()
+
+	var resp pb.GetWithRepeatedQueryResponse
 
 	respBytes, err := ioutil.ReadAll(httpResp.Body)
 	if err != nil {

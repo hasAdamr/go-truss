@@ -10,6 +10,11 @@ service HTTPPermutations {
       get: "/getwithquery"
     };
   }
+  rpc GetWithRepeatedQuery (GetWithRepeatedQueryRequest) returns (GetWithRepeatedQueryResponse) {
+    option (google.api.http) = {
+      get: "/getwithrepeatedquery"
+    };
+  }
 }
 
 message GetWithQueryRequest {
@@ -29,11 +34,6 @@ message GetWithRepeatedQueryResponse {
   int64 V = 1;
 }
 
-  /*rpc GetWithRepeatedQuery (GetWithRepeatedQueryRequest) returns (GetWithRepeatedQueryResponse) {*/
-    /*option (google.api.http) = {*/
-      /*get: "/sum"*/
-    /*};*/
-  /*}*/
   /*rpc GetWithQueryAndPath (GetWithQueryAndPathRequest) returns (GetWithQueryAndPathResponse) {*/
     /*option (google.api.http) = {*/
       /*get: "/sum"*/
