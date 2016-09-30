@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package TEST;
+
+import "google/api/annotations.proto";
+
+import "clock_state.proto";
+import "enqueue.proto";
+import "notification.proto";
+
+// Service defines the RPC interface the service
+// will expose and which is required
+// to be implemented in transport/rpc/bindings
+service ChronoService {
+  rpc Enqueue(EnqueueRequest) returns (EnqueueResponse)
+    option (google.api.http) = {
+      get: "/Enqueue"
+    };
+  }
+  rpc Notify(NotificationRequest) returns (NotificationResponse)
+    option (google.api.http) = {
+      get: "/Notify"
+    };
+  }
+  rpc Retry(RetryRequest) returns (RetryResponse)
+    option (google.api.http) = {
+      get: "/Retry"
+    };
+  }
+  rpc Pause(ClockStateRequest) returns (ClockStateResponse)
+    option (google.api.http) = {
+      get: "/Pause"
+    };
+  }
+  rpc Resume(ClockStateRequest) returns (ClockStateResponse)
+    option (google.api.http) = {
+      get: "/Resume"
+    };
+  }
+  rpc Stats(ClockStateRequest) returns (ClockStateResponse)
+    option (google.api.http) = {
+      get: "/Stats"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
+}
+
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  ServiceStatus status = 1;
+}

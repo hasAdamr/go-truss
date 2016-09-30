@@ -2,13 +2,39 @@ syntax = "proto3";
 
 package TEST;
 
+import "google/api/annotations.proto";
+
 service ReportingService {
-  rpc ExportQueue(ExportQueueRequest) returns (ExportQueueResponse) {}
-  rpc ExportGet(ExportGetRequest) returns (ExportGetResponse) {}
-  rpc ExportRedshiftQueue(ExportRedshiftQueueRequest) returns (ExportRedshiftQueueResponse) {}
-  rpc ExportRedshiftGet(ExportRedshiftGetRequest) returns (ExportRedshiftGetResponse) {}
-  rpc Status(StatusRequest) returns (StatusResponse) {}
-  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc ExportQueue(ExportQueueRequest) returns (ExportQueueResponse) {
+    option (google.api.http) = {
+      get: "/ExportQueue"
+    };
+  }
+  rpc ExportGet(ExportGetRequest) returns (ExportGetResponse) {
+    option (google.api.http) = {
+      get: "/ExportGet"
+    };
+  }
+  rpc ExportRedshiftQueue(ExportRedshiftQueueRequest) returns (ExportRedshiftQueueResponse) {
+    option (google.api.http) = {
+      get: "/ExportRedshiftQueue"
+    };
+  }
+  rpc ExportRedshiftGet(ExportRedshiftGetRequest) returns (ExportRedshiftGetResponse) {
+    option (google.api.http) = {
+      get: "/ExportRedshiftGet"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
 }
 
 enum ServiceStatus {

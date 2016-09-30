@@ -1,0 +1,252 @@
+syntax = "proto3";
+
+package TEST;
+
+import "google/api/annotations.proto";
+
+import "client.proto";
+import "client_attribution_partner.proto";
+import "partner_account.proto";
+import "country.proto";
+import "partner.proto";
+import "site.proto";
+import "vendor.proto";
+import "vendor_request.proto";
+
+// The Platform Entity service definition.
+service EntitiesService {
+  rpc ClientGetById(ClientGetByIdRequest) returns (ClientEntity) {
+    option (google.api.http) = {
+      get: "/ClientGetById"
+    };
+  }
+  rpc ClientGetByIds(ClientGetByIdsRequest) returns (ClientEntities) {
+    option (google.api.http) = {
+      get: "/ClientGetByIds"
+    };
+  }
+  rpc ClientGetByRefId(ClientGetByRefIdRequest) returns (ClientEntity) {
+    option (google.api.http) = {
+      get: "/ClientGetByRefId"
+    };
+  }
+  rpc ClientFind(ClientFindRequest) returns (ClientEntities) {
+    option (google.api.http) = {
+      get: "/ClientFind"
+    };
+  }
+  rpc ClientCreate(ClientCreateRequest) returns (ClientEntity) {
+    option (google.api.http) = {
+      get: "/ClientCreate"
+    };
+  }
+  rpc ClientAttributionPartnerGetById(ClientAttributionPartnerGetByIdRequest) returns (ClientAttributionPartnerEntity) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerGetById"
+    };
+  }
+  rpc ClientAttributionPartnerGetByIds(ClientAttributionPartnerGetByIdsRequest) returns (ClientAttributionPartnerEntities) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerGetByIds"
+    };
+  }
+  rpc ClientAttributionPartnerGetByPartnerRefId(ClientAttributionPartnerGetByPartnerRefIdRequest) returns (ClientAttributionPartnerEntity) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerGetByPartnerRefId"
+    };
+  }
+  rpc ClientAttributionPartnerFind(ClientAttributionPartnerFindRequest) returns (ClientAttributionPartnerEntities) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerFind"
+    };
+  }
+  rpc ClientAttributionPartnerCreate(ClientAttributionPartnerCreateRequest) returns (ClientAttributionPartnerEntity) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerCreate"
+    };
+  }
+  rpc ClientAttributionPartnerUpdate(ClientAttributionPartnerUpdateRequest) returns (ClientAttributionPartnerEntity) {
+    option (google.api.http) = {
+      get: "/ClientAttributionPartnerUpdate"
+    };
+  }
+  rpc PartnerAccountGetById(PartnerAccountGetByIdRequest) returns (PartnerAccountEntity) {
+    option (google.api.http) = {
+      get: "/PartnerAccountGetById"
+    };
+  }
+  rpc PartnerAccountGetByIds(PartnerAccountGetByIdsRequest) returns (PartnerAccountEntities) {
+    option (google.api.http) = {
+      get: "/PartnerAccountGetByIds"
+    };
+  }
+  rpc PartnerAccountGetByRefId(PartnerAccountGetByRefIdRequest) returns (PartnerAccountEntity) {} 
+    option (google.api.http) = {
+      get: "/PartnerAccountGetByRefId"
+    };
+  }
+  rpc PartnerAccountFindByClientPartner(PartnerAccountFindByClientPartnerRequest) returns (PartnerAccountEntities) {
+    option (google.api.http) = {
+      get: "/PartnerAccountFindByClientPartner"
+    };
+  }
+  rpc PartnerAccountFindByClient(PartnerAccountFindByClientRequest) returns (PartnerAccountEntities) {
+    option (google.api.http) = {
+      get: "/PartnerAccountFindByClient"
+    };
+  }
+  rpc PartnerAccountCreate(PartnerAccountCreateRequest) returns (PartnerAccountEntity) {
+    option (google.api.http) = {
+      get: "/PartnerAccountCreate"
+    };
+  }
+  rpc PartnerAccountUpdate(PartnerAccountUpdateRequest) returns (PartnerAccountEntity) {
+    option (google.api.http) = {
+      get: "/PartnerAccountUpdate"
+    };
+  }
+  rpc CountryGetByCode(CountryGetByCodeRequest) returns (CountryEntity) {
+    option (google.api.http) = {
+      get: "/CountryGetByCode"
+    };
+  }
+  rpc CountryGetByCodes(CountryGetByCodesRequest) returns (CountryEntities) {
+    option (google.api.http) = {
+      get: "/CountryGetByCodes"
+    };
+  }
+  rpc CountryGetByName(CountryGetByNameRequest) returns (CountryEntity) {
+    option (google.api.http) = {
+      get: "/CountryGetByName"
+    };
+  }
+  rpc PartnerGetById(PartnerGetByIdRequest) returns (PartnerEntity) {
+    option (google.api.http) = {
+      get: "/PartnerGetById"
+    };
+  }
+  rpc PartnerGetByIds(PartnerGetByIdsRequest) returns (PartnerEntities) {
+    option (google.api.http) = {
+      get: "/PartnerGetByIds"
+    };
+  }
+  rpc PartnerGetByRefId(PartnerGetByRefIdRequest) returns (PartnerEntity) {
+    option (google.api.http) = {
+      get: "/PartnerGetByRefId"
+    };
+  }
+  rpc PartnerGetByClientVendor(PartnerGetByClientVendorRequest) returns (PartnerEntities) {
+    option (google.api.http) = {
+      get: "/PartnerGetByClientVendor"
+    };
+  }
+  rpc PartnerGetByClientVendorName(PartnerGetByClientVendorNameRequest) returns (PartnerEntities) {
+    option (google.api.http) = {
+      get: "/PartnerGetByClientVendorName"
+    };
+  }
+  rpc PartnerCreate(PartnerCreateRequest) returns (PartnerEntity) {
+    option (google.api.http) = {
+      get: "/PartnerCreate"
+    };
+  }
+  rpc SiteGetById(SiteGetByIdRequest) returns (SiteEntity) {
+    option (google.api.http) = {
+      get: "/SiteGetById"
+    };
+  }
+  rpc SiteGetByIds(SiteGetByIdsRequest) returns (SiteEntities) {
+    option (google.api.http) = {
+      get: "/SiteGetByIds"
+    };
+  }
+  rpc SiteGetByRefId(SiteGetByRefIdRequest) returns (SiteEntity) {
+    option (google.api.http) = {
+      get: "/SiteGetByRefId"
+    };
+  }
+  rpc SiteGetByClientPackage(SiteGetByClientPackageRequest) returns (SiteEntities) {
+    option (google.api.http) = {
+      get: "/SiteGetByClientPackage"
+    };
+  }
+  rpc SiteCreate(SiteCreateRequest) returns (SiteEntity) {
+    option (google.api.http) = {
+      get: "/SiteCreate"
+    };
+  }
+  rpc VendorGetById(VendorGetByIdRequest) returns (VendorEntity) {} 
+    option (google.api.http) = {
+      get: "/VendorGetById"
+    };
+  }
+  rpc VendorGetByIds(VendorGetByIdsRequest) returns (VendorEntities) {} 
+    option (google.api.http) = {
+      get: "/VendorGetByIds"
+    };
+  }
+  rpc VendorGetByRefId(VendorGetByRefIdRequest) returns (VendorEntity) {} 
+    option (google.api.http) = {
+      get: "/VendorGetByRefId"
+    };
+  }
+  rpc VendorGetByName(VendorGetByNameRequest) returns (VendorEntity) {}
+    option (google.api.http) = {
+      get: "/VendorGetByName"
+    };
+  }
+  rpc VendorFind(VendorFindRequest) returns (VendorEntities) {}   
+    option (google.api.http) = {
+      get: "/VendorFind"
+    };
+  }
+  rpc VendorCreate(VendorCreateRequest) returns (VendorEntity) {} 
+    option (google.api.http) = {
+      get: "/VendorCreate"
+    };
+  }
+  rpc VendorUpdate(VendorUpdateRequest) returns (VendorEntity) {
+    option (google.api.http) = {
+      get: "/VendorUpdate"
+    };
+  }
+  rpc VendorRequestFind(VendorRequestFindRequest) returns (VendorRequestEntities) {
+    option (google.api.http) = {
+      get: "/VendorRequestFind"
+    };
+  }
+  rpc VendorRequestCreate(VendorRequestCreateRequest) returns (VendorRequestEntity) {
+    option (google.api.http) = {
+      get: "/VendorRequestCreate"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
+}
+
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  ServiceStatus status = 1;
+}
