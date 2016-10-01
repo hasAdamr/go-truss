@@ -15,6 +15,12 @@ service HTTPPermutations {
       get: "/getwithrepeatedquery"
     };
   }
+  rpc PostWithNestedMessageBody (PostWithNestedMessageBodyRequest) returns (PostWithNestedMessageBodyResponse) {
+    option (google.api.http) = {
+      post: "/postwithnestedmessagebody"
+      body: "*"
+    };
+  }
 }
 
 message GetWithQueryRequest {
@@ -31,6 +37,19 @@ message GetWithRepeatedQueryRequest {
 }
 
 message GetWithRepeatedQueryResponse {
+  int64 V = 1;
+}
+
+message PostWithNestedMessageBodyRequest {
+  NestedMessage NM = 1;
+}
+
+message NestedMessage {
+  int64 A = 1;
+  int64 B = 2;
+}
+
+message PostWithNestedMessageBodyResponse {
   int64 V = 1;
 }
 

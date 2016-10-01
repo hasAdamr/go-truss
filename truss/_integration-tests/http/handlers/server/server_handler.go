@@ -47,7 +47,18 @@ func (s httptestService) GetWithRepeatedQuery(ctx context.Context, in *pb.GetWit
 	return &response, nil
 }
 
+// PostWithNestedMessageBody implements Service.
+func (s httptestService) PostWithNestedMessageBody(ctx context.Context, in *pb.PostWithNestedMessageBodyRequest) (*pb.PostWithNestedMessageBodyResponse, error) {
+	_ = ctx
+	_ = in
+	response := pb.PostWithNestedMessageBodyResponse{
+		V: in.NM.A + in.NM.B,
+	}
+	return &response, nil
+}
+
 type Service interface {
 	GetWithQuery(ctx context.Context, in *pb.GetWithQueryRequest) (*pb.GetWithQueryResponse, error)
 	GetWithRepeatedQuery(ctx context.Context, in *pb.GetWithRepeatedQueryRequest) (*pb.GetWithRepeatedQueryResponse, error)
+	PostWithNestedMessageBody(ctx context.Context, in *pb.PostWithNestedMessageBodyRequest) (*pb.PostWithNestedMessageBodyResponse, error)
 }
