@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package TEST;
+
+import "google/api/annotations.proto";
+
+import "job.proto";
+
+// Service defines the RPC interface the service
+// will expose and which is required
+// to be implemented in transport/rpc/bindings
+service DispatcherService {
+  rpc Submit(JobConfigRequest) returns (JobResponse)
+    option (google.api.http) = {
+      get: "/Submit"
+    };
+  }
+  rpc Stop(JobRequest) returns (JobResponse)
+    option (google.api.http) = {
+      get: "/Stop"
+    };
+  }
+  rpc Cancel(JobRequest) returns (JobResponse)
+    option (google.api.http) = {
+      get: "/Cancel"
+    };
+  }
+  rpc Retry(JobRequest) returns (JobResponse)
+    option (google.api.http) = {
+      get: "/Retry"
+    };
+  }
+  rpc Info(JobRequest) returns (JobResponse)
+    option (google.api.http) = {
+      get: "/Info"
+    };
+  }
+  rpc Logs(JobRequest) returns (JobLogsResponse)
+    option (google.api.http) = {
+      get: "/Logs"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {} 
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
+}
+
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  ServiceStatus status = 1;
+}

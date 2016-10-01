@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package TEST;
+
+import "google/api/annotations.proto";
+
+import "access_token.proto";
+import "service_key_values.proto";
+import "service_endpoints.proto";
+
+service AuthService {
+  rpc AccessTokenValidateGrpc(AccessTokenValidateGrpcRequest) returns (AccessTokenValidateResponse) {
+    option (google.api.http) = {
+      get: "/AccessTokenValidateGrpc"
+    };
+  }
+  rpc AccessTokenValidateHttpjson(AccessTokenValidateHttpjsonRequest) returns (AccessTokenValidateResponse) {
+    option (google.api.http) = {
+      get: "/AccessTokenValidateHttpjson"
+    };
+  }
+  rpc ServiceKeyValuesGet(ServiceKeyValuesGetRequest) returns (ServiceKeyValuesGetResponse) {
+    option (google.api.http) = {
+      get: "/ServiceKeyValuesGet"
+    };
+  }
+  rpc ServiceEndpointsGet(ServiceEndpointsGetRequest) returns (ServiceEndpointsGetResponse) {
+    option (google.api.http) = {
+      get: "/ServiceEndpointsGet"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
+} 
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  ServiceStatus status = 1;

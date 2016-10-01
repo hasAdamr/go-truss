@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package TEST;
+
+import "google/api/annotations.proto";
+
+import "session.proto";
+
+service SignonService {
+  rpc SessionAuthenticate(SessionAuthenticateRequest) returns (SessionAuthenticateResponse) {
+    option (google.api.http) = {
+      get: "/SessionAuthenticate"
+    };
+  }
+  rpc SessionAuthenticateA2f(SessionAuthenticateA2fRequest) returns (SessionAuthenticateA2fResponse) {
+    option (google.api.http) = {
+      get: "/SessionAuthenticateA2f"
+    };
+  }
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/Status"
+    };
+  }
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/Ping"
+    };
+  }
+}
+
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  ServiceStatus status = 1;
+}
