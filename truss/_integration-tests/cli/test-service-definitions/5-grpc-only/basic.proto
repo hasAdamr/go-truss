@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package TEST;
+
+service Basic {
+  rpc GetBasic (BasicTypeRequest) returns (BasicTypeResponse) {}
+}
+
+message BasicTypeRequest {}
+
+message BasicTypeResponse {}

@@ -56,6 +56,10 @@ func _TestMapTypes(t *testing.T) {
 	testEndToEnd("4-maps", t)
 }
 
+func TestGRPCOnly(t *testing.T) {
+	testEndToEnd("5-grpc-only", t)
+}
+
 // runReference stores data about a client-server interaction
 // This data is then used to display output
 type runReference struct {
@@ -91,7 +95,7 @@ func testEndToEnd(defDir string, t *testing.T, trussOptions ...string) {
 	}
 
 	// Run them save a reference to each run
-	ref := runServerAndClient(fullpath, port, port+1000)
+	ref := runServerAndClient(fullpath, port)
 	if ref.clientErr || ref.clientHTTPErr || ref.serverErr {
 		t.Logf("Communication test FAILED - %v", ref.name)
 		t.Logf("Client Output\n%v", ref.clientOutput)
@@ -179,7 +183,6 @@ func buildTestService(serviceDir string) (err error) {
 func goBuild(name, outputPath, relCodePath string, errChan chan error) {
 
 	// $ go get
-
 	goGetExec := exec.Command(
 		"go",
 		"get",
@@ -196,7 +199,6 @@ func goBuild(name, outputPath, relCodePath string, errChan chan error) {
 	}
 
 	// $ go build
-
 	goBuildExec := exec.Command(
 		"go",
 		"build",
@@ -214,9 +216,7 @@ func goBuild(name, outputPath, relCodePath string, errChan chan error) {
 	errChan <- nil
 }
 
-// runServerAndClient execs a TEST-server and TEST-client and puts a
-// runReference to their interaction on the runRefs channel
-func runServerAndClient(path string, port int, debugPort int) runReference {
+func runServerAndClient(path string, port int) runReference {
 	// From within a folder with a truss `service`
 	// These are the paths to the compiled binaries
 	const relativeServerPath = "/bin/TEST-server"
@@ -231,7 +231,7 @@ func runServerAndClient(path string, port int, debugPort int) runReference {
 		"-http.addr",
 		":"+strconv.Itoa(port-70),
 		"-debug.addr",
-		":"+strconv.Itoa(debugPort),
+		":0",
 	)
 
 	// Put serverOut to be the writer of data from Stdout and Stderr
@@ -259,7 +259,6 @@ func runServerAndClient(path string, port int, debugPort int) runReference {
 	cHTTPOut, cHTTPErr := runClient(path, "http", port-70)
 
 	var sErr bool
-
 	// If the server ever stopped then it errored
 	// If it did not stop, kill it and see if that errors
 	select {
@@ -270,13 +269,9 @@ func runServerAndClient(path string, port int, debugPort int) runReference {
 			// This likely means the server never started
 			sErr = true
 		} else {
-			// If the Process is not nil, kill it, clean up our mess
+			// If the Process is not nil, kill it so it does not keep running
 			err := server.Process.Kill()
-			if err != nil {
-				sErr = true
-			} else {
-				sErr = false
-			}
+			sErr = err != nil
 		}
 	}
 
@@ -314,13 +309,7 @@ func runClient(path string, trans string, port int) ([]byte, bool) {
 	}
 
 	cOut, err := client.CombinedOutput()
-
-	var cErr bool
-	if err != nil {
-		cErr = true
-	} else {
-		cErr = false
-	}
+	cErr := err != nil
 
 	return cOut, cErr
 }
