@@ -21,7 +21,7 @@ func init() {
 
 }
 
-func TestServerTempl(t *testing.T) {
+func TestServerMethsTempl(t *testing.T) {
 	const def = `
 		syntax = "proto3";
 
@@ -60,7 +60,7 @@ func TestServerTempl(t *testing.T) {
 	he.Methods = sd.Service.Methods
 	he.PackageName = sd.PkgName
 
-	gen, err := applyServerTempl(he)
+	gen, err := applyServerMethsTempl(he)
 	if err != nil {
 		t.Fatal(err)
 	}
