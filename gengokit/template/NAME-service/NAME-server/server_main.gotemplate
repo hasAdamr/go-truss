@@ -22,6 +22,7 @@ import (
 	handler "{{.ImportPath -}} /handlers/server"
 	svc "{{.ImportPath -}} /generated"
 	pb "{{.PBImportPath -}}"
+	middlewares "{{.ImportPath -}} /middlewares"
 
 )
 
@@ -47,7 +48,7 @@ func main() {
 	var service pb.{{GoName .Service.Name}}Server
 	{
 		service = handler.NewService()
-		// add service logging and metrics here
+		service = middlewares.InjectServiceMiddlewares(service)
 	}
 
 	// Endpoint domain.
@@ -55,7 +56,7 @@ func main() {
 	var {{ToLower $i.Name}}Endpoint endpoint.Endpoint
 	{
 		{{ToLower $i.Name}}Endpoint = svc.Make{{$i.Name}}Endpoint(service)
-		// Add endpoint tracing, instrumentation and logging here
+		{{ToLower $i.Name}}Endpoint = middlewares.InjectEndpointMiddlewares({{ToLower $i.Name}}Endpoint)
 	}
 	{{end}}
 	endpoints := svc.Endpoints{
