@@ -1,11 +1,11 @@
 package generator
 
 import (
-	"bytes"
+	//"bytes"
 	"go/format"
-	"io"
+	//"io"
 	"io/ioutil"
-	"path/filepath"
+	//"path/filepath"
 	"strings"
 	"testing"
 
@@ -14,7 +14,7 @@ import (
 
 	"github.com/TuneLab/go-truss/gengokit"
 	"github.com/TuneLab/go-truss/gengokit/handler"
-	templateFileAssets "github.com/TuneLab/go-truss/gengokit/template"
+	//templateFileAssets "github.com/TuneLab/go-truss/gengokit/template"
 	"github.com/TuneLab/go-truss/svcdef"
 
 	"github.com/TuneLab/go-truss/gengokit/gentesthelper"
@@ -129,6 +129,7 @@ func stringToTemplateExector(def, importPath string) (*gengokit.TemplateExecutor
 
 }
 
+/*
 func TestAllTemplates(t *testing.T) {
 	const goPackage = "github.com/TuneLab/go-truss/gengokit"
 	const goPBPackage = "github.com/TuneLab/go-truss/gengokit/general-service"
@@ -404,6 +405,7 @@ func TestUpdateMethods(t *testing.T) {
 	}
 	testHandlerGeneration("NAME-service/handlers/server/server_handler.gotemplate")
 }
+*/
 
 func diff(a, b string) string {
 	return gentesthelper.DiffStrings(
@@ -438,6 +440,7 @@ func renderService(svc *svcdef.Service, prev string, te *gengokit.TemplateExecut
 	return nextCode, nil
 }
 
+/*
 func testGenerateResponseFile(templFP string, te *gengokit.TemplateExecutor, prevGenMap map[string]io.Reader) ([]byte, error) {
 	// apply server_handler.go template
 	code, err := generateResponseFile(templFP, te, prevGenMap)
@@ -459,6 +462,7 @@ func testGenerateResponseFile(templFP string, te *gengokit.TemplateExecutor, pre
 
 	return formatted, nil
 }
+*/
 
 // testFormat takes a string representing golang code and attempts to return a
 // formated copy of that code.

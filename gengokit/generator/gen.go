@@ -29,6 +29,86 @@ func init() {
 	})
 }
 
+type templateRegistry map[string]gengokit.Renderable
+
+func (tr templateRegistry) Register(alias string, r gengokit.Renderable) error {
+	if tr[alias] != nil {
+		return errors.Errorf("cannot register alias twice %q:", alias)
+	}
+	tr[alias] = r
+	return nil
+}
+
+func (tr templateRegistry) isRegistered(alias string) bool {
+	return tr[alias] != nil
+}
+
+func (tr templateRegistry) RenderAll(te *gengokit.TemplateExecutor) ([]truss.NamedReadWriter, error) {
+	var renderedFiles []truss.NamedReadWriter
+
+	for k, _ := range tr {
+		f, err := tr.Render(k, te)
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot render template")
+		}
+		if f == nil {
+			continue
+		}
+
+		renderedFiles = append(renderedFiles, f)
+	}
+
+	return renderedFiles, nil
+}
+
+func (tr templateRegistry) Render(f string, te *gengokit.TemplateExecutor) (truss.NamedReadWriter, error) {
+	fileContent, err := tr[f].Render(f, te)
+
+	fileBytes, err := ioutil.ReadAll(fileContent)
+	if err != nil {
+		return nil, err
+	}
+
+	// ignore error as we want to write the code either way to inspect after
+	// writing to disk
+	formattedCode := formatCode(fileBytes)
+
+	var r truss.SimpleFile
+
+	// Set the path to the file and write the code to the file
+	r.Path = templatePathToActual(f, te.PackageName)
+	if _, err = r.Write(formattedCode); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
+func createRegistry(te *gengokit.TemplateExecutor, p prevGen) (templateRegistry, error) {
+	tr := make(templateRegistry)
+
+	// handler
+	const hPath = "NAME-service/handlers/server/server_handler.gotemplate"
+	actualFP := templatePathToActual(hPath, te.PackageName)
+	file := p[actualFP]
+	h, err := handler.New(te.Service, file, te.PackageName)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot parse previous handler: %q", actualFP)
+	}
+	tr.Register(hPath, h)
+
+	// for anything not registered yet
+	for _, templFP := range templFiles.AssetNames() {
+		if !tr.isRegistered(templFP) {
+			tr.Register(templFP, defaultRender{})
+		}
+	}
+
+	return tr, nil
+}
+
+type prevGen map[string]io.Reader
+
 // GenerateGokit returns a gokit service generated from a service definition (svcdef),
 // the package to the root of the generated service goPackage, the package
 // to the .pb.go service struct files (goPBPackage) and any prevously generated files.
@@ -38,77 +118,14 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) ([]truss.NamedReadWr
 		return nil, errors.Wrap(err, "cannot create template executor")
 	}
 
-	fpm := make(map[string]io.Reader, len(conf.PreviousFiles))
+	prev := make(prevGen, len(conf.PreviousFiles))
 	for _, f := range conf.PreviousFiles {
-		fpm[f.Name()] = f
+		prev[f.Name()] = f
 	}
 
-	var codeGenFiles []truss.NamedReadWriter
+	tr, err := createRegistry(te, prev)
 
-	for _, templFP := range templFiles.AssetNames() {
-		file, err := generateResponseFile(templFP, te, fpm)
-		if err != nil {
-			return nil, errors.Wrap(err, "cannot render template")
-		}
-		if file == nil {
-			continue
-		}
-
-		codeGenFiles = append(codeGenFiles, file)
-	}
-
-	return codeGenFiles, nil
-}
-
-// generateResponseFile contains logic to choose how to render a template file
-// based on path and if that file was generated previously. It accepts a
-// template path to render, a templateExecutor to apply to the template, and a
-// map of paths to files for the previous generation. It returns a
-// truss.NamedReadWriter representing the generated file
-func generateResponseFile(templFP string, te *gengokit.TemplateExecutor, prevGenMap map[string]io.Reader) (truss.NamedReadWriter, error) {
-	var genCode io.Reader
-	var err error
-
-	// Get the actual path to the file rather than the template file path
-	actualFP := templatePathToActual(templFP, te.PackageName)
-	// If we are rendering the server and or the client
-	if templFP == "NAME-service/handlers/server/server_handler.gotemplate" {
-		file := prevGenMap[actualFP]
-		h, err := handler.New(te.Service, file, te.PackageName)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot parse previous handler: %q", actualFP)
-		}
-
-		if genCode, err = h.Render(templFP, te); err != nil {
-			return nil, errors.Wrap(err, "cannot render template")
-		}
-	}
-
-	// if no code has been generated just apply the template
-	if genCode == nil {
-		if genCode, err = applyTemplateFromPath(templFP, te); err != nil {
-			return nil, errors.Wrap(err, "cannot render template")
-		}
-	}
-
-	codeBytes, err := ioutil.ReadAll(genCode)
-	if err != nil {
-		return nil, err
-	}
-
-	// ignore error as we want to write the code either way to inspect after
-	// writing to disk
-	formattedCode := formatCode(codeBytes)
-
-	var resp truss.SimpleFile
-
-	// Set the path to the file and write the code to the file
-	resp.Path = actualFP
-	if _, err = resp.Write(formattedCode); err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
+	return tr.RenderAll(te)
 }
 
 // templatePathToActual accepts a templateFilePath and the packageName of the
@@ -122,6 +139,17 @@ func templatePathToActual(templFilePath, packageName string) string {
 	actual = strings.TrimSuffix(actual, "template")
 
 	return actual
+}
+
+type defaultRender struct{}
+
+func (_ defaultRender) Render(f string, te *gengokit.TemplateExecutor) (io.Reader, error) {
+	c, err := applyTemplateFromPath(f, te)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot render template")
+	}
+
+	return c, nil
 }
 
 // applyTemplateFromPath calls applyTemplate with the template at templFilePath
