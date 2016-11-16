@@ -283,11 +283,15 @@ func exprString(e ast.Expr) string {
 
 func applyServerTempl(exec *gengokit.TemplateExecutor) (io.Reader, error) {
 	log.Debug("Rendering handler for the first time")
-	return applyTemplate(serverTempl, "ServerTempl", exec)
+	return exec.ApplyTemplate(serverTempl, "ServerTempl")
 }
 
 func applyServerMethsTempl(exec handlerExecutor) (io.Reader, error) {
-	return applyTemplate(serverMethsTempl, "ServerMethsTempl", exec)
+	funcMap := template.FuncMap{
+		"ToLower": strings.ToLower,
+		"GoName":  generatego.CamelCase,
+	}
+	return gengokit.ApplyTemplate(serverMethsTempl, "ServerMethsTempl", exec, funcMap)
 }
 
 func applyTemplate(templ string, templName string, exec interface{}) (io.Reader, error) {

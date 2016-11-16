@@ -2,13 +2,11 @@
 package generator
 
 import (
-	"bytes"
 	"go/format"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
-	"text/template"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
@@ -63,6 +61,9 @@ func (tr templateRegistry) RenderAll(te *gengokit.TemplateExecutor) ([]truss.Nam
 
 func (tr templateRegistry) Render(f string, te *gengokit.TemplateExecutor) (truss.NamedReadWriter, error) {
 	fileContent, err := tr[f].Render(f, te)
+	if fileContent == nil {
+		return nil, nil
+	}
 
 	fileBytes, err := ioutil.ReadAll(fileContent)
 	if err != nil {
@@ -153,30 +154,13 @@ func (_ defaultRender) Render(f string, te *gengokit.TemplateExecutor) (io.Reade
 }
 
 // applyTemplateFromPath calls applyTemplate with the template at templFilePath
-func applyTemplateFromPath(templFilePath string, executor *gengokit.TemplateExecutor) (io.Reader, error) {
-	templBytes, err := templFiles.Asset(templFilePath)
+func applyTemplateFromPath(templFP string, t *gengokit.TemplateExecutor) (io.Reader, error) {
+	templBytes, err := templFiles.Asset(templFP)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to find template file: %v", templFilePath)
+		return nil, errors.Wrapf(err, "unable to find template file: %v", templFP)
 	}
 
-	return applyTemplate(templBytes, templFilePath, executor)
-}
-
-func applyTemplate(templBytes []byte, templName string, executor *gengokit.TemplateExecutor) (io.Reader, error) {
-	templateString := string(templBytes)
-
-	codeTemplate, err := template.New(templName).Funcs(executor.FuncMap).Parse(templateString)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot create template")
-	}
-
-	outputBuffer := bytes.NewBuffer(nil)
-	err = codeTemplate.Execute(outputBuffer, executor)
-	if err != nil {
-		return nil, errors.Wrap(err, "template error")
-	}
-
-	return outputBuffer, nil
+	return t.ApplyTemplate(string(templBytes), templFP)
 }
 
 // formatCode takes a string representing golang code and attempts to return a

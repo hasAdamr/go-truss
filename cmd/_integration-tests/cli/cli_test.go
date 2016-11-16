@@ -195,7 +195,7 @@ func goBuild(name, outputPath, relCodePath string, errChan chan error) {
 	err := goGetExec.Run()
 
 	if err != nil {
-		errChan <- errors.Wrapf(err, "could not $ go get %v", relCodePath)
+		errChan <- errors.Wrapf(err, "cannot \n%v", goGetExec.Args)
 		return
 	}
 

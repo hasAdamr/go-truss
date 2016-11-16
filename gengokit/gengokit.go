@@ -1,11 +1,13 @@
 package gengokit
 
 import (
+	"bytes"
 	"io"
 	"strings"
 	"text/template"
 
 	generatego "github.com/golang/protobuf/protoc-gen-go/generator"
+	"github.com/pkg/errors"
 
 	"github.com/TuneLab/go-truss/gengokit/clientarggen"
 	"github.com/TuneLab/go-truss/gengokit/httptransport"
@@ -55,4 +57,24 @@ func NewTemplateExecutor(sd *svcdef.Svcdef, conf Config) (*TemplateExecutor, err
 		HTTPHelper:   httptransport.NewHelper(sd.Service),
 		FuncMap:      funcMap,
 	}, nil
+}
+
+func (t *TemplateExecutor) ApplyTemplate(templ string, templName string) (io.Reader, error) {
+	return ApplyTemplate(templ, templName, t, t.FuncMap)
+}
+
+func ApplyTemplate(templ string, templName string, exec interface{}, funcMap template.FuncMap) (io.Reader, error) {
+	codeTemplate, err := template.New(templName).Funcs(funcMap).Parse(templ)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot create template")
+	}
+
+	outputBuffer := bytes.NewBuffer(nil)
+	err = codeTemplate.Execute(outputBuffer, exec)
+	if err != nil {
+		return nil, errors.Wrap(err, "template error")
+	}
+
+	return outputBuffer, nil
+
 }
