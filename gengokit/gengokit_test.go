@@ -54,7 +54,7 @@ func TestNewTemplateExecutor(t *testing.T) {
 		PBPackage: "github.com/TuneLab/go-truss/gengokit/general-service",
 	}
 
-	te, err := NewTemplateExecutor(sd, conf)
+	te, err := NewExecutor(sd, conf)
 	if err != nil {
 		t.Fatal(err)
 	}
