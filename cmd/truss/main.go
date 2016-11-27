@@ -56,11 +56,15 @@ func main() {
 	genFiles, err := generateCode(cfg, dt, sd)
 	exitIfError(errors.Wrap(err, "cannot generate service"))
 
+	errChan := make(chan error, len(genFiles))
 	for _, f := range genFiles {
-		err := writeGenFile(f, cfg.ServicePath)
-		if err != nil {
-			exitIfError(errors.Wrap(err, "cannot to write output"))
-		}
+		go func(f truss.NamedReadWriter) {
+			errChan <- writeGenFile(f, cfg.ServicePath)
+		}(f)
+	}
+
+	for _ = range genFiles {
+		exitIfError(errors.Wrap(<-errChan, "cannot to write output"))
 	}
 }
 
