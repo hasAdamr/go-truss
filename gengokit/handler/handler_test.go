@@ -20,15 +20,12 @@ import (
 )
 
 var gopath []string
-var diff = helper.DiffStrings
-var testFormat = helper.TestFormat
 
 func init() {
 	gopath = filepath.SplitList(os.Getenv("GOPATH"))
 }
 
 func init() {
-	_ = helper.DiffStrings
 	log.SetLevel(log.DebugLevel)
 }
 
@@ -62,6 +59,22 @@ func TestServerMethsTempl(t *testing.T) {
 			}
 		}
 	`
+	var expected = `
+		// ProtoMethod implements Service.
+		func (s generalService) ProtoMethod(ctx context.Context, in *pb.RequestMessage) (*pb.ResponseMessage, error){
+			var resp pb.ResponseMessage
+			resp = pb.ResponseMessage{
+				// Output:
+				}
+			return &resp, nil
+		}
+	`
+	var err error
+	expected, err = helper.TestFormat(expected)
+	if err != nil {
+		t.Fatalf("Failed to format expected: %s", err)
+	}
+
 	sd, err := svcdef.NewFromString(def, gopath)
 	if err != nil {
 		t.Fatal(err)
@@ -76,19 +89,17 @@ func TestServerMethsTempl(t *testing.T) {
 		t.Fatal(err)
 	}
 	genBytes, err := ioutil.ReadAll(gen)
-	const expected = `
-		// ProtoMethod implements Service.
-		func (s generalService) ProtoMethod(ctx context.Context, in *pb.RequestMessage) (*pb.ResponseMessage, error){
-			var resp pb.ResponseMessage
-			resp = pb.ResponseMessage{
-				// Output:
-				}
-			return &resp, nil
-		}
-	`
-	a, b, di := helper.DiffGoCode(string(genBytes), expected)
-	if strings.Compare(a, b) != 0 {
-		t.Fatalf("Server method template output different than expected\n %s", di)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	genCode, err := helper.TestFormat(string(genBytes))
+	if err != nil {
+		t.Fatalf("Failed to format generated code: %s\n\nCODE:\n\n%s", err, genCode)
+	}
+
+	if genCode != expected {
+		t.Fatalf("Server method template output different than expected\n %s", helper.DiffStrings(expected, genCode))
 	}
 }
 
@@ -122,19 +133,7 @@ func TestApplyServerTempl(t *testing.T) {
 			}
 		}
 	`
-	conf := gengokit.Config{
-		GoPackage: "github.com/TuneLab/go-truss/gengokit/general-service",
-		PBPackage: "github.com/TuneLab/go-truss/gengokit/general-service",
-	}
-	sd, err := svcdef.NewFromString(def, gopath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	te, err := gengokit.NewExecutor(sd, conf)
-
-	gen, err := applyServerTempl(te)
-	genBytes, err := ioutil.ReadAll(gen)
-	expected := `
+	var expected = `
 		package handler
 
 		import (
@@ -159,9 +158,31 @@ func TestApplyServerTempl(t *testing.T) {
 			return &resp, nil
 		}
 	`
-	a, b, di := helper.DiffGoCode(string(genBytes), expected)
-	if strings.Compare(a, b) != 0 {
-		t.Fatalf("Server template output different than expected\n %s", di)
+
+	var err error
+	expected, err = helper.TestFormat(expected)
+	if err != nil {
+		t.Fatalf("Failed to format expected: %s", err)
+	}
+	conf := gengokit.Config{
+		GoPackage: "github.com/TuneLab/go-truss/gengokit/general-service",
+		PBPackage: "github.com/TuneLab/go-truss/gengokit/general-service",
+	}
+	sd, err := svcdef.NewFromString(def, gopath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	te, err := gengokit.NewExecutor(sd, conf)
+
+	gen, err := applyServerTempl(te)
+	genBytes, err := ioutil.ReadAll(gen)
+	genCode, err := helper.TestFormat(string(genBytes))
+	if err != nil {
+		t.Fatalf("Failed to format generated code: %s\n\nCODE:\n\n%s", err, genCode)
+	}
+
+	if genCode != expected {
+		t.Fatalf("Server template output different than expected\n %s", helper.DiffStrings(expected, genCode))
 	}
 }
 
@@ -463,10 +484,10 @@ func TestUpdateMethods(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if strings.Compare(firstCode, secondCode) != 0 {
+	if firstCode != secondCode {
 		t.Fatal("Generated code differs after regenerated with same definition\n" +
 			templPath + "\n" +
-			diff(firstCode, secondCode))
+			helper.DiffStrings(firstCode, secondCode))
 	}
 
 	svc.Methods = append(svc.Methods, allMethods[1])
@@ -479,7 +500,7 @@ func TestUpdateMethods(t *testing.T) {
 	if thirdCode <= secondCode {
 		t.Fatal("Generated code not longer after regenerated with additional service method\n" +
 			templPath + "\n" +
-			diff(secondCode, thirdCode))
+			helper.DiffStrings(secondCode, thirdCode))
 	}
 
 	// remove the first one rpc
@@ -493,7 +514,7 @@ func TestUpdateMethods(t *testing.T) {
 	if forthCode >= thirdCode {
 		t.Fatal("Generated code not shorter after regenerated with fewer service method\n" +
 			templPath + "\n" +
-			diff(thirdCode, forthCode))
+			helper.DiffStrings(thirdCode, forthCode))
 	}
 
 	svc.Methods = allMethods
@@ -506,7 +527,7 @@ func TestUpdateMethods(t *testing.T) {
 	if fifthCode <= forthCode {
 		t.Fatal("Generated code not longer after regenerated with additional service method\n" +
 			templPath + "\n" +
-			diff(forthCode, fifthCode))
+			helper.DiffStrings(forthCode, fifthCode))
 	}
 }
 
@@ -531,7 +552,7 @@ func renderService(svc *svcdef.Service, prev string, te *gengokit.Executor, temp
 		return "", err
 	}
 
-	nextCode, err := testFormat(string(nextBytes))
+	nextCode, err := helper.TestFormat(string(nextBytes))
 	if err != nil {
 		return "", errors.Wrap(err, "cannot format")
 	}

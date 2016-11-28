@@ -52,50 +52,23 @@ func FuncSourceCode(val interface{}) (string, error) {
 
 // DiffStrings returns the line differences of two strings. Useful for
 // examining how generated code differs from expected code.
-func DiffStrings(a, b string) string {
+// Callers should call TestFormat on code first compare formatted code
+func DiffStrings(want, got string) string {
 	t := difflib.UnifiedDiff{
-		A:        difflib.SplitLines(a),
-		B:        difflib.SplitLines(b),
-		FromFile: "A",
-		ToFile:   "B",
+		A:        difflib.SplitLines(want),
+		B:        difflib.SplitLines(got),
+		FromFile: "Want",
+		ToFile:   "Got",
 		Context:  5,
 	}
 	text, _ := difflib.GetUnifiedDiffString(t)
 	return text
 }
 
-// DiffGoCode returns normalized versions of inA and inB using the go formatter
-// so that differences in indentation or trailing spaces are ignored. A diff of
-// inA and inB is also returned.
-func DiffGoCode(inA, inB string) (outA, outB, diff string) {
-	codeFormat := func(in string) string {
-		// Trim starting and ending space so format starts indenting at 0 for
-		// both strings
-		out := strings.TrimSpace(in)
-
-		// Format code, if we get an error we keep out the same,
-		// otherwise we use the formmated version
-		outBytes, err := format.Source([]byte(out))
-		if err != nil {
-			return "FAILED TO FORMAT\n" + out
-		} else {
-			return string(outBytes)
-		}
-
-		return out
-	}
-	outA = codeFormat(inA)
-	outB = codeFormat(inB)
-	diff = DiffStrings(
-		outA,
-		outB,
-	)
-	return
-}
-
-// testFormat takes a string representing golang code and attempts to return a
+// TestFormat takes a string representing golang code and attempts to return a
 // formated copy of that code.
 func TestFormat(code string) (string, error) {
+	code = strings.TrimSpace(code)
 	formatted, err := format.Source([]byte(code))
 
 	if err != nil {

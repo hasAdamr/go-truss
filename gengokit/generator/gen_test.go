@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"go/format"
 	"io"
 	"io/ioutil"
 	"os"
@@ -16,7 +15,7 @@ import (
 	templateFileAssets "github.com/TuneLab/go-truss/gengokit/template"
 	"github.com/TuneLab/go-truss/svcdef"
 
-	"github.com/TuneLab/go-truss/gengokit/gentesthelper"
+	helper "github.com/TuneLab/go-truss/gengokit/gentesthelper"
 )
 
 var gopath []string
@@ -99,38 +98,10 @@ func TestApplyTemplateFromPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = testFormat(string(endCode))
+	_, err = helper.TestFormat(string(endCode))
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func svcMethodsNames(methods []*svcdef.ServiceMethod) []string {
-	var mNames []string
-	for _, m := range methods {
-		mNames = append(mNames, m.Name)
-	}
-
-	return mNames
-}
-
-func stringToTemplateExector(def, importPath string) (*gengokit.Executor, error) {
-	sd, err := svcdef.NewFromString(def, gopath)
-	if err != nil {
-		return nil, err
-	}
-
-	conf := gengokit.Config{
-		GoPackage: importPath,
-		PBPackage: importPath,
-	}
-
-	te, err := gengokit.NewExecutor(sd, conf)
-	if err != nil {
-		return nil, err
-	}
-
-	return te, nil
 }
 
 func TestAllTemplates(t *testing.T) {
@@ -273,7 +244,7 @@ func TestAllTemplates(t *testing.T) {
 }
 
 func diff(a, b string) string {
-	return gentesthelper.DiffStrings(
+	return helper.DiffStrings(
 		a,
 		b,
 	)
@@ -293,22 +264,10 @@ func testGenerateResponseFile(executor *gengokit.Executor, prev io.Reader, templ
 	}
 
 	// format the code
-	formatted, err := testFormat(string(codeBytes))
+	formatted, err := helper.TestFormat(string(codeBytes))
 	if err != nil {
 		return string(codeBytes), err
 	}
 
 	return formatted, nil
-}
-
-// testFormat takes a string representing golang code and attempts to return a
-// formated copy of that code.
-func testFormat(code string) (string, error) {
-	formatted, err := format.Source([]byte(code))
-
-	if err != nil {
-		return code, err
-	}
-
-	return string(formatted), nil
 }
