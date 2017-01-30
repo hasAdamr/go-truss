@@ -36,6 +36,9 @@ test-go:
 test-integration:
 	$(MAKE) -C cmd/_integration-tests
 
+metalinter:
+	gometalinter --enable-all --json $(GOPATH)/src/github.com/TuneLab/truss/... | jq -C .
+
 # Removes generated code from tests
 testclean:
 	$(MAKE) -C cmd/_integration-tests clean
